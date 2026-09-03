@@ -2,13 +2,14 @@ import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import wallet from "../../devnet-wallet.json";
 import {
   createSignerFromKeypair,
-  generateSigner,
+  publicKey,
   signerIdentity,
+  some,
 } from "@metaplex-foundation/umi";
-import { create, mplCore } from "@metaplex-foundation/mpl-core";
+import { mplCore, updateV1 } from "@metaplex-foundation/mpl-core";
 import { base58 } from "@metaplex-foundation/umi/serializers";
 import { getRpcUrl } from "../env";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import { resolve } from "path";
 
 const MINT_FILE = resolve(__dirname, "../../mint.json");
@@ -25,22 +26,23 @@ umi.use(mplCore());
 (async () => {
   try {
     const mintData = JSON.parse(readFileSync(MINT_FILE, "utf-8"));
-    const metadataUri = mintData.metadataUri;
-    const asset = generateSigner(umi);
+    const asset = publicKey(mintData.asset);
 
-    const tx = await create(umi, {
+    //change the name and uri to your new values
+    const newName = "old_monk";
+    const newUri =
+      "https://gateway.irys.xyz/CPT9sx4DkTq8s18Y14fS6pEhDGvjHNSG6dAKtfQTWFyC";
+
+    const tx = await updateV1(umi, {
       asset,
-      name: "old_monk",
-      uri: metadataUri,
+      newName: some(newName),
+      newUri: some(newUri),
     }).sendAndConfirm(umi);
 
     const signature = base58.deserialize(tx.signature)[0];
 
-    const existing = JSON.parse(readFileSync(MINT_FILE, "utf-8"));
-    writeFileSync(MINT_FILE, JSON.stringify({ ...existing, asset: asset.publicKey }, null, 2));
-
-    console.log(`signature ${signature} , asset : ${asset.publicKey}`);
+    console.log(`update txid: ${signature}`);
   } catch (e) {
-    console.log(`errior ${e}`);
+    console.log(`error ${e}`);
   }
 })();
