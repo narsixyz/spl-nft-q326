@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test --require ts-node/register \"tests/**/*.test.ts\"",
+    "test:watch": "node --test --watch --require ts-node/register \"tests/**/*.test.ts\"",
+    "test:devnet": "RUN_DEVNET_TESTS=1 node --test --require ts-node/register tests/devnet.integration.test.ts",
+    "typecheck": "tsc -p tsconfig.test.json",
     "spl:init": "npx ts-node src/spl/spl_init.ts",
     "spl:metadata": "npx ts-node src/spl/spl_metadata.ts",
     "spl:mint": "npx ts-node src/spl/spl_mint.ts",
